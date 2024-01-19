@@ -1,0 +1,112 @@
+<style>
+    *{
+        background: #2f3c4f;
+    }
+    #c{
+        border: 10px solid #506f86;
+        text-align: center;
+        position: absolute;
+        left: 50%;
+        transform:translateX(-50%);
+    }
+    .b{
+        position: absolute;
+        border: 10px solid #506f86;
+        color: #506f86;
+        padding: 10px;
+        width: 100px;
+        font-size: 50px;
+    }
+</style>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<body onkeypress="keyEvents(event)">
+<canvas id="c" width="400" height="400"></canvas>
+<button onclick="chDir([-1, 0])" class="b" style="bottom: 20%; left: 20%;">🡸</button>
+<button onclick="chDir([1, 0])" class="b" style="bottom: 20%; right: 20%;">🡺</button>
+<button onclick="chDir([0, -1])" class="b" style="transform:translateX(-50%); bottom: 30%; left: 50%;">🡹</button>
+<button onclick="chDir([0, 1])" class="b" style="transform:translateX(-50%); bottom: 10%; left: 50%;">🡻</button>
+</body>
+<script>
+    window.setInterval("r()", 100);
+    window.setInterval("u()", 500);
+    var c = document.getElementById("c");
+    var p = 0;
+    var dir = [0, 1];
+    var aP = [200, 200];
+    var path = [];
+    s();
+    function s(){
+        p = 0;
+        path = [[0,0], [40, 0], [40, 40]];
+        dir = [0, 1];
+    }
+    function r(){
+        var ctx = c.getContext("2d");
+        ctx.fillStyle = "#2f3c4f";
+        ctx.fillRect(0, 0, c.width, c.height);
+
+        ctx.font = "300px Century Gothic";
+        ctx.fillStyle = "#FBB040";
+        ctx.textAlign = "center";
+        ctx.fillText(p.toString(), c.width / 2, c.height / 1.25);
+
+        ctx.fillStyle = "#FBB040";
+        ctx.fillRect(aP[0], aP[1], 40, 40);
+
+        ctx.fillStyle = "#506f86";
+        for (let i = 0; i < path.length; i++) {
+            ctx.fillRect(path[i][0], path[i][1], 40, 40);
+        }
+    }
+    function add(){
+        p++;
+        let ldir = [Math.max(-1, Math.min(path[1][0] - path[0][0], 1)), Math.max(-1, Math.min(path[1][1] - path[0][1], 1))]
+        path.unshift([path[0][0] - 40 * ldir[0],  path[0][1] - 40 * ldir[1]]);
+    }
+    function u(){
+        let p = [path[path.length - 1][0] + 40 * dir[0],  path[path.length - 1][1] + 40 * dir[1]];
+        console.log(pD(p));        if(p[0] >= 400 || p[0] <= -40 || p[1] <= -40 || p[1] >= 400 || pD(p)){
+            s();
+            return;
+        }
+        path.push(p);
+        path.shift();
+        if(aP[0] == p[0] && aP[1] == p[1]){a();}
+    }
+    function a(){
+        var p = [Math.floor(Math.random() * 10) * 40, Math.floor(Math.random() * 10) * 40];
+        if(pD(p)){
+            a();
+            return;
+        }
+        aP = p;
+        add();
+    }
+    function chDir(val){
+        if(val[0] * -1 == dir[0] || val[1] * -1 == dir[1]){
+            return;
+        }
+        dir = val;
+    }
+    function pD(p){
+        for (let i = 0; i < path.length; i++) {
+            if(path[i][0] == p[0] && path[i][1] == p[1]){return true};
+        }
+        return false;
+    }
+    function keyEvents(event){
+        if (event.keyCode == 119){
+            chDir([0, -1])
+        }
+        if(event.keyCode == 115){
+            chDir([0, 1])
+        }
+        if(event.keyCode == 97){
+            chDir([-1, 0])
+        }
+        if(event.keyCode == 100){
+            chDir([1, 0])
+        }
+    }
+</script>

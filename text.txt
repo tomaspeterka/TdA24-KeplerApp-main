@@ -1,0 +1,7 @@
+1. source code 1. Docker
+2. test code 2. Frontend
+3. tourdeapp/zadani source code
+4. 404
+5. backend bio lektora
+6. brandmanual
+7. discord <spoiler>

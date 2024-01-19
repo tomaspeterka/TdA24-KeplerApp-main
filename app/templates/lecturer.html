@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Lecturer{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="../static/css/lecturer.css">
+<script type="text/javascript" src="../static/js/libraries/qr-code-styling.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{% endblock %}
+
+{% block content %}
+<body>
+    <div id="basic_container">
+        <div id="name_div">
+            <h1 id="whole_name"></h1>
+            <h2 id="claim"></h2>
+        </div>
+        <img id="profile_image" alt="lecturer's image">
+    </div>
+    <div id="info_container">
+        <div id="paragraph"></div>
+        <div id="location_div">
+            <h3>Lokace:</h3>
+            <h3 id="location"></h3>
+        </div>
+            
+        <div id="price_div">
+            <h3>Cena:</h3>
+            <h3 id="price"></h3>
+        </div>
+
+        <h2>Kontakt:</h2>
+
+        <h3>Telefonní čísla:</h3>
+        <div id="phone_box"></div>
+
+        <h3>E-maily:</h3>
+        <div id="email_box"></div>
+
+        <div id="qrcode" style="margin: 50px;"></div>
+
+        </div>
+
+        <script> var data = {{lecturer|tojson}} </script>
+        <script type="module" src="../static/js/lecturer.js"></script>
+    </body>
+</html>
+{% endblock %}

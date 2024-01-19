@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>api tester</title>
+</head>
+<body>
+    <button onclick="lecturers_post_test()">TEST: /api/lecturers (POST)</button><br>
+    <button onclick="lecturers_get_test()">TEST: /api/lecturers (GET)</button><br>
+    <button onclick="lecturer_get_test()">TEST: /api/lecturer/{uuid} (GET)</button><input type="text" id="g_uuid" value="bdd90159-5a8d-4c3a-b34b-449ea400cb24"><br>
+    <button onclick="lecturer_put_test()">TEST: /api/lecturer/{uuid} (PUT)</button><input type="text" id="p_uuid" value="bdd90159-5a8d-4c3a-b34b-449ea400cb24"><br>
+    <button onclick="lecturer_delete_test()">TEST: /api/lecturer/{uuid} (DELETE)</button><input type="text" id="d_uuid" value="bdd90159-5a8d-4c3a-b34b-449ea400cb24"><br>
+    <button onclick="lecturers_delete()">delete all</button>
+</body>
+</html>
+<script>
+    function lecturers_post_test(){
+        data = {
+            "title_before": "Mgr.",
+            "first_name": "Petra",
+            "middle_name": "Swil",
+            "last_name": "Plachá",
+            "title_after": "MBA",
+            "picture_url": "https://picsum.photos/200",
+            "location": "Brno",
+            "claim": "Bez dobré prezentace je i nejlepší myšlenka k ničemu.",
+            "bio": "<b>Formátovaný text</b> s <i>bezpečnými</i> tagy.",
+            "tags": [
+                {
+                    "name": "Marketing"
+                }
+            ],
+            "price_per_hour": 720,
+            "contact": {
+                "telephone_numbers": [
+                    "+123 777 338 111"
+                ],
+                "emails": [
+                    "user@example.com"
+                ]
+            }
+        }
+        post_request('/api/lecturers', JSON.stringify(data))
+    }
+
+    function lecturers_get_test(){
+        get_request('/api/lecturers')
+    }
+
+    function lecturer_put_test(){
+        data = {
+  "title_before": "Mgr.",
+  "first_name": "Petra",
+  "middle_name": "Swil",
+  "last_name": "Plachá",
+  "title_after": "MBA",
+  "picture_url": "https://tourdeapp.cz/storage/images/2023_02_25/412ff296a291f021bbb6de10e8d0b94863fa89308843b/big.png.webp",
+  "location": "Brno",
+  "claim": "Aktivní studentka / Předsedkyně spolku / Projektová manažerka",
+  "bio": "<p>Baví mě organizovat věci. Ať už to bylo vyvíjení mobilních aplikací ve Futured, pořádání konferencí, spolupráce na soutěžích Prezentiáda, pIšQworky, <b>Tour de App</b> a Středoškolák roku, nebo třeba dobrovolnictví, vždycky jsem skončila u projektového managementu, rozvíjení soft-skills a vzdělávání. U studentských projektů a akcí jsem si vyzkoušela snad všechno od marketingu po logistiku a moc ráda to předám dál. Momentálně studuji Pdf MUNI a FF MUNI v Brně.</p>",
+  "tags": [
+    {
+      "uuid": "6d348a49-d16f-4524-86ac-132dd829b429",
+      "name": "Dobrovolnictví"
+    },
+    {
+      "uuid": "8e0568c3-e235-42aa-9eaa-713a2545ff5b",
+      "name": "Studentské spolky"
+    },
+    {
+      "uuid": "996c16c8-4715-4de6-9dd0-ea010b3f64c7",
+      "name": "Efektivní učení"
+    },
+    {
+      "uuid": "c20b98dd-f37e-4fa7-aac1-73300abf086e",
+      "name": "Prezentační dovednosti"
+    },
+    {
+      "uuid": "824cfe88-8a70-4ffb-bcb8-d45670226207",
+      "name": "Marketing pro neziskové studentské projekty"
+    },
+    {
+      "uuid": "fa23bea1-489f-4cb2-b64c-7b3cd7079951",
+      "name": "Mimoškolní aktivity"
+    },
+    {
+      "uuid": "8325cacc-1a1f-4233-845e-f24acfd0287b",
+      "name": "Projektový management, event management"
+    },
+    {
+      "uuid": "ba65a665-e141-40ab-bbd2-f4b1f2b01e42",
+      "name": "Fundraising pro neziskové studentské projekty"
+    }
+  ],
+  "price_per_hour": 1200,
+  "contact": {
+    "telephone_numbers": ["+420 722 482 974"],
+    "emails": ["placha@scg.cz", "predseda@scg.cz"]
+  }
+}
+
+        const response = new XMLHttpRequest();
+        response.open("PUT", `/api/lecturers/${document.getElementById("p_uuid").value}`);
+        response.setRequestHeader('Content-Type', 'application/json');
+        response.send(JSON.stringify(data));
+
+        response.onload = (e) => {
+            alert(response.response);
+        }
+    }
+
+    function lecturer_delete_test(){
+        const response = new XMLHttpRequest();
+        response.open("DELETE", `/api/lecturers/${document.getElementById("d_uuid").value}`);
+        response.send();
+
+        response.onload = (e) => {
+            alert(response.response);
+        }
+    }
+
+    function lecturers_delete(){
+        const response = new XMLHttpRequest();
+        response.open("DELETE", `/api/lecturers`);
+        response.send();
+
+        response.onload = (e) => {
+            alert(response.response);
+        }
+    }
+
+    function lecturer_get_test(){
+        get_request(`/api/lecturers/${document.getElementById("g_uuid").value}`)
+    }
+
+    function get_request(path) {
+        const response = new XMLHttpRequest();
+        response.open("GET", path);
+        response.send();
+
+        response.onload = (e) => {
+            alert(response.response);
+        }
+    }
+
+    function post_request(path, data, content_type = 'application/json'){
+        const response = new XMLHttpRequest();
+        response.open("POST", path);
+        response.setRequestHeader('Content-Type', content_type);
+        response.send(data);
+
+        response.onload = (e) => {
+            alert(response.response);
+        }
+    }
+
+</script>

@@ -1,0 +1,19 @@
+.h_center {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.v_center {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.hv_center {
+    top : 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.circle_mask{
+    border-radius: 50%;
+}

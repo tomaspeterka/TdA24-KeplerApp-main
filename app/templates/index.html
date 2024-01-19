@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}Index{% endblock %}
+{% block head %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="../static/css/jquery.range.css">
+<script src="../static/js/jquery.range.js"></script>
+{% endblock %}
+
+{% block content %}
+<body xmlns="http://www.w3.org/1999/html" style="margin: 0px;">
+    <div id="intro_panel" style="display: block">
+        <h1>TEACHER DIGITAL AGENCY</h1>
+    </div>
+    <main style="margin: 8px; min-height: 100vh;">
+        <div id="search_menu"> <!--class="v_center"-->
+            <div>Město:</div>
+            <div id="location_drop" class="text-dropdown h_center" style="position: relative; z-index: 4;">
+                <input type="text" id="search_location" style="width: calc(100% - 6px)">
+                <div style="display: none; z-index: 2;">
+                </div>
+            </div><br>
+            <div>Cena:</div><br>
+            <input class="range-slider" type="hidden" value="0,1000" id="pay_range"/><br><br>
+            <div>Tagy:</div>
+            <div id="tag_bar">
+                <span id="tag_list">
+                    <div id="tag_drop" class="text-dropdown">
+                        <input type="text" id="search_tag">
+                        <div style="display: none;">
+                        </div>
+                    </div>
+                </span>
+            </div>
+        </div>
+        <div style="text-align: center;" id="cards">
+
+        </div>
+    </main>
+</body>
+</html>
+<script src="../static/js/search_dropdown.js"></script>
+<script>
+    lecturers = []
+
+    indexes = {}
+    shuffle = []
+
+
+    // function load_lecturers(){
+    //     const response = new XMLHttpRequest();
+    //     response.open("GET", "/api/lecturers");
+    //     response.send();
+    //
+    //     response.onload = (e) => {
+    //         lecturers = response.response;
+    //     }
+    // }
+    //
+
+    function search_but(){
+        let loc_val = document.getElementById("search_location").value
+        if (loc_val === "" || loc_val === "Vše") { loc_val = null }
+        let tags = get_selected_tags_uuids()
+        if (tags.length === 0) { tags = null; }
+
+        const pay_values = document.getElementById("pay_range").value.split(",")
+        let min_pay = Number(pay_values[0])
+        let max_pay = Number(pay_values[1])
+
+        search(loc_val, tags, min_pay, max_pay)
+    }
+
+    function search(location, tags, pay_min, pay_max){
+        let data = {
+            "location" : location,
+            "tags":tags,
+            "pay_min": pay_min,
+            "pay_max":pay_max,
+        }
+
+        const response = new XMLHttpRequest();
+        response.open("POST", "/api/search");
+        response.setRequestHeader('Content-Type', "application/json");
+        response.send(JSON.stringify(data));
+
+        response.onload = (e) => {
+            let data = JSON.parse(response.response)
+            console.log(data)
+            shuffle = data['shuffle']
+
+
+            populate_cards(data['search'])
+        }
+    }
+
+    function get_search_utils() {
+        const response = new XMLHttpRequest();
+        response.open("GET", "/api/searchutils");
+        response.send();
+
+        response.onload = (e) => {
+            indexes = JSON.parse(response.response);
+            setup_indexes()
+            setup_search_ui()
+            search_but()
+        }
+    }
+
+    get_search_utils()
+
+    function setup_indexes(){
+        indexes['locations'].unshift("Vše")
+
+        indexes['tags_dict'] = {}
+        for (let i = 0; i < indexes['tags'].length; i++){
+            indexes['tags_dict'][indexes['tags'][i]['name']] = indexes['tags'][i]['uuid']
+        }
+    }
+
+    function setup_search_ui(){
+        // location
+        new SearchDropDown(document.getElementById("location_drop"), document.getElementById("search_location"), indexes['locations'])
+        // tags
+        const tag_drpdwn = new SearchDropDown(document.getElementById("tag_drop"), document.getElementById("search_tag"), Object.keys(indexes['tags_dict']), true, true)
+
+        document.getElementById("tag_drop").addEventListener("input_submit", (e) => {
+            add_tag_to_tag_list(e.detail.input, document.getElementById("tag_list"), tag_drpdwn)
+            tag_drpdwn.used_options.push(input_2_pseudo_val(e.detail.input))
+        })
+
+        // price range
+
+        let min_pay = Math.floor(indexes['price_range'][0] / 50) * 50
+        let max_pay = Math.ceil(indexes['price_range'][1] / 50) * 50
+
+        document.getElementById("pay_range").value = min_pay.toString() + "," + max_pay.toString()
+        // setup slider
+        $('.range-slider').jRange({
+            from: min_pay,
+            to: max_pay,
+            step: 50,
+            scale: [min_pay, max_pay],
+            format: '%s',
+            width: 300,
+            showLabels: true,
+            isRange : true,
+            theme: "theme-blue",
+            ondragend: function () { search_but() },
+            onbarclicked: function () { search_but() }
+        });
+
+        // auto search
+        document.getElementById("tag_drop").addEventListener("input_submit", (e) => {
+            search_but()
+        })
+
+        document.getElementById("location_drop").addEventListener("input_submit", (e) => {
+            search_but()
+        })
+    }
+
+    function get_selected_tags_uuids(){
+        let out = []
+        let tag_els = document.getElementById("tag_list").children
+        for (let i = 0; i < tag_els.length; i++) {
+            if (tag_els[i].id === "tag_drop" || tag_els[i].style.opacity === "0") continue
+            out.push(indexes.tags_dict[tag_els[i].title])
+        }
+        return out
+    }
+
+    function populate_cards(data){
+        document.getElementById("cards").innerHTML = ""
+        for (let i = 0; i < data.length; i++){
+            document.getElementById("cards").appendChild(create_card(data[i]))
+        }
+
+        if (document.getElementById("cards").innerHTML === ""){
+            document.getElementById("cards").innerHTML = "bezvýsledné"
+        }
+    }
+
+    function create_card(lecturer){
+        let card = document.createElement("a")
+        card.className = "card"
+        card.style.position = "relative"
+        card.href = "/lecturer/" + lecturer.uuid
+        let name_split = [lecturer.title_before, lecturer.first_name, lecturer.middle_name, lecturer.last_name, lecturer.title_after]
+        let full_name = ""
+
+        for (let i = 0; i < name_split.length; i++){
+            if (name_split[i] !== null && name_split[i] !== "" && name_split[i] !== "null") {
+                full_name += name_split[i] + " "
+            }
+        }
+        full_name.trim()
+
+        card.innerHTML = `
+<img src='${lecturer.picture_url}' class="circle_mask"> <!--style="width: 0px; height: 100px"-->
+<h1>${full_name}</h1>
+<p>
+${lecturer.claim}
+</p>
+<div class="loc_container">
+    <img src="../static/images/location-pin.svg" style="height: 2rem; width: 2rem; margin-right: 10px; float: left;">
+    <span style="float: left">${lecturer.location}</span>
+    <span style="float: right">${lecturer.price_per_hour} kč/h</span>
+</div>`
+        return card
+    }
+</script>
+{% endblock %}
